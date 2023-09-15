@@ -28,7 +28,7 @@
 					<td>회사(company)</td><td>${personVo.company}</td>
 				</tr>
 				<tr>
-					<td><a href="/phonebook4/updateform/${personVo.person_id}">[수정]</a></td>
+					<td><a href="/phonebook4/updateForm?no=${personVo.person_id}">[수정]</a></td>
 					<td><a href="/phonebook4/delete/${personVo.person_id}">[삭제]</a></td>
 				</tr>
 			</table>
@@ -36,7 +36,7 @@
 		</c:forEach>
 	<!-- 반복문 끝 -->
 	
-	<a href="/phonebook4/writeform">전화번호 등록폼</a> <br>
+	<a href="/phonebook4/writeForm">전화번호 등록폼</a> <br>
 	<br><br><br><br><br><br><br>
 </body>
 </html>

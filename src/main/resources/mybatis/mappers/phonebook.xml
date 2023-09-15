@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="phonebook">
+
+	<!-- 전체 리스트 가져오기 -->
+						<!-- resultType: "여기에 담아서 줘라." rs.set 하던 결 얘가 대신 해줌. -->
+	<select id="select" resultType="com.javaex.vo.PersonVo">
+								<!-- selectList라도 Vo를 적어준다 -->
+		<!-- ↓ sql문이라는 걸 알려주는 괴물 -->
+		<![CDATA[
+			select  person_id,	--뒷단에서, 칼럼 명으로 vo에 있는 setter를 찾는다.
+					name,		-- ㄴ> 우리가 person_id라고 쓰면, setPerson_id를 찾는 다는 것
+					hp,
+					company
+			from person
+			order by person_id asc
+		]]> 
+	</select>
+	
+	
+	<!-- 1명 삭제하기 -->
+	<delete id="delete" parameterType="int">
+				   <!-- parameterType: #{}에 넣을 값의 타입 -->
+	<![CDATA[
+		delete from person
+		where person_id = #{personId}	
+		-- 여기 내부에 주석 넣을 땐, 기존에 사용하던 기호 쓰면 안 댐
+	]]>              <!-- #{} == ? (씨1ㅂ 기호가 왜 이래) -->
+	</delete>
+	
+	
+	<!-- 등록하기 -->
+	<insert id="insert" parameterType="com.javaex.vo.PersonVo">
+	<![CDATA[
+		insert into person
+		values(seq_person_id.nextVal, #{name}, #{hp}, #{company})
+	]]>
+	</insert>
+	
+	
+	<!-- 1명 가져오기 -->
+	<select id="selectByNo" parameterType="int" resultType="com.javaex.vo.PersonVo">
+	<![CDATA[
+		select  person_id,
+		        name,
+		        hp,
+		        company
+		from person
+		where person_id = #{personId}
+	]]>
+	</select>
+	
+	
+	<!-- 수정 -->
+	<update id="update" parameterType="com.javaex.vo.PersonVo">
+	<![CDATA[
+		update person
+		set  name = #{name},
+		     hp = #{hp},
+		     company = #{company}
+		where person_id = #{person_id}
+	]]>
+	</update>
+	
+	
+</mapper>
+
+
+
+
+
+

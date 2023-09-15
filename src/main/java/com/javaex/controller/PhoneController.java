@@ -2,6 +2,7 @@ package com.javaex.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -14,155 +15,90 @@ import com.javaex.dao.PersonDao;
 import com.javaex.vo.PersonVo;
 
 @Controller
-//@RequestMapping("/user")
 public class PhoneController {
-	//필드
-	//생성자
-	//메소드gs
 	
+	@Autowired
+	private PersonDao personDao;
 	
-	//메소드일반
-	//localhost:8000/phonebook4/list
-	@RequestMapping(value="/list", method={RequestMethod.POST, RequestMethod.GET})
+	//리스트
+	@RequestMapping(value="/list", method={RequestMethod.GET, RequestMethod.POST})
 	public String list(Model model) {
-		
 		System.out.println("PhoneController.list()");
-			
-		//personDao.personSelect() 리스트 가져온다
-		PersonDao personDao = new PersonDao();
-		List<PersonVo> personList = personDao.personSelect("");
-		System.out.println(personList);
 		
-		//model 주소를 받고 메소드를 이용해서 담는다
-		// --> DS request.setAttribute("personList", personList)
+		//db에서 리스트를 가져온다.
+		List<PersonVo> personList = personDao.personSelect();
+		
+		//ds에게 데이터 보냄. 포워드 request.Attribute 영역에 넣어라.
 		model.addAttribute("personList", personList);
 		
-		return "/WEB-INF/list.jsp";
-		
-		//request의 attribute에 넣는다
-		//list.jsp에 포워드
+		//forward 해라.
+		return "list";
+		//return이 null이면 list로 forward 하더라. 미친 ㅅ1ㄲ
 	}
 	
-	//주소록 등록 폼
-	@RequestMapping(value="/writeform", method={RequestMethod.POST, RequestMethod.GET})
-	public String writeform() {
-		
-		System.out.println("PhoneController.writeform()");
-
-		return "/WEB-INF/writeForm.jsp";
-
-	}
-	
-	//주소록 등록
-	@RequestMapping(value="/write", method={RequestMethod.POST, RequestMethod.GET})
-	public String write(@ModelAttribute PersonVo personVo) {
-		
-		System.out.println("PhoneController.write()");
-
-		//vo로 묶기	ds
-		/*
-		PersonVo personVo = new PersonVo();
-		personVo.setName(name);
-		personVo.setHp(hp);
-		personVo.setCompany(company);
-		*/
-		
-		System.out.println(personVo);
-		
-		//dao를 통해 저장
-
-		PersonDao personDao = new PersonDao();
-		int count = personDao.personInsert(personVo);		
-		System.out.println("personInsert count: "+count);
-		
-		return "redirect:/list";
-
-	}
-	
-	/*
-	//주소록 등록
-	@RequestMapping(value="/write", method={RequestMethod.POST, RequestMethod.GET})
-	public String write(@RequestParam("name") String name,
-						@RequestParam("hp") String hp,
-						@RequestParam("dompany") String company) {
-		
-		System.out.println("PhoneController.write()");
-
-		//vo로 묶기	ds
-		PersonVo personVo = new PersonVo();
-		personVo.setName(name);
-		personVo.setHp(hp);
-		personVo.setCompany(company);
-		
-		System.out.println(personVo);
-		
-		//dao를 통해 저장
-		PersonDao personDao = new PersonDao();
-		int count = personDao.personInsert(personVo);		
-		System.out.println("personInsert count: "+count);
-		
-		return "redirect:/list";
-	}
-	*/
-	
-	//person 삭제
-	@RequestMapping(value="/delete/{no}", method={RequestMethod.POST, RequestMethod.GET})
+	//삭제
+	@RequestMapping(value="/delete/{no}", method= {RequestMethod.GET, RequestMethod.POST})
 	public String delete(@PathVariable(value="no") int personId) {
-		
 		System.out.println("PhoneController.delete()");
-		System.out.println("no: "+personId);
+		System.out.println("/delete/{no}: "+personId);
 		
-		PersonDao personDao = new PersonDao();
-		int count = personDao.personDelete(personId);		
-		System.out.println("personInsert count: "+count);
+		//dao를 통해서 삭제한다
+		int count = personDao.personDelete(personId);
+		//System.out.println("delete 여부: "+count);
 		
 		return "redirect:/list";
 	}
-	/*
-	@RequestMapping(value="/delete", method={RequestMethod.POST, RequestMethod.GET})
-	public String delete(@RequestParam("no") int personId) {
-		
-		System.out.println("PhoneController.delete()");
-		System.out.println("no: "+personId);
-		
-		PersonDao personDao = new PersonDao();
-		int count = personDao.personDelete(personId);		
-		System.out.println("personInsert count: "+count);
-		
-		return "redirect:/list";
-	}
-	*/
 	
-	//주소록 수정 폼
-	@RequestMapping(value="/updateform/{no}", method={RequestMethod.POST, RequestMethod.GET})
-	public String updateform(Model model,
-							 @PathVariable(value="no") int personId) {
+	//등록폼
+	@RequestMapping(value="/writeForm", method= {RequestMethod.GET, RequestMethod.POST})
+	public String writeForm() {
+		System.out.println("PhoneController.writeForm()");
 		
-		System.out.println("PhoneController.updateform()");
+		return "writeForm";
+	}
+	
+	//등록
+	@RequestMapping(value="/write", method= {RequestMethod.GET, RequestMethod.POST})
+	public String write(@ModelAttribute PersonVo personVo) {
+		System.out.println("PhoneController.write()");
+		
+		int count = personDao.personInsert(personVo);
+		//System.out.println("write count: "+count);
+		//여기서 count 또 받는 이유: 나중에 js에서 event 파라미터 등으로 써먹을려고
 
-		PersonDao personDao = new PersonDao();
-		PersonVo personVo = personDao.getPerson(personId);
+		return "redirect:/list";
+	}
+	
+	//수정폼
+	@RequestMapping(value="/updateForm", method= {RequestMethod.GET, RequestMethod.POST})
+	public String updateForm(@RequestParam(value="no") int personId,
+							 Model model) {
+		System.out.println("PhoneController.updateForm()");
+		//System.out.println("updateForm personId: "+personId);
 		
+		//1명 데이터 가져오기
+		PersonVo personVo = personDao.personSelectOne(personId);
+		
+		//ds 포워드 시킨다
 		model.addAttribute("personVo", personVo);
 		
-		return "/WEB-INF/updateForm.jsp";
-
+		return "updateForm";
 	}
 	
-	//person 수정
-	@RequestMapping(value={"/update"}, method={RequestMethod.POST, RequestMethod.GET})
+	//수정
+	@RequestMapping(value="/update", method= {RequestMethod.GET, RequestMethod.POST})
 	public String update(@ModelAttribute PersonVo personVo) {
-		
 		System.out.println("PhoneController.update()");
-		System.out.println("personVo: "+personVo);
 		
-		PersonDao personDao = new PersonDao();		
-		int count = personDao.personUpdate(personVo);		
-		System.out.println("personUpdate count: "+count);
+		int count = personDao.personUpdate(personVo);
 		
 		return "redirect:/list";
 	}
+	
 }
+
+
+
 
 
 
